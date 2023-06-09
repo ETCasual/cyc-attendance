@@ -1,4 +1,4 @@
-import { type NextPage } from "next";
+import type { NextPage } from "next";
 import Head from "next/head";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
@@ -8,22 +8,23 @@ import { FormInput } from "@/components";
 
 import { PulseLoader } from "react-spinners";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 
 YupPassword(Yup);
 
 const Home: NextPage = () => {
-  const [email, setEmail] = useState<string>("");
-  const [pw, setPw] = useState<string>("");
+  // const [email, setEmail] = useState<string>("");
+  // const [pw, setPw] = useState<string>("");
   const { data, mutate } = api.user.registerUser.useMutation();
-  const query = api.user.verifyLogin.useQuery(
-    {
-      email: email,
-      password: pw,
-    },
-    {
-      retry: false,
-    }
-  );
+  // const query = api.user.verifyLogin.useQuery(
+  //   {
+  //     email: email,
+  //     password: pw,
+  //   },
+  //   {
+  //     retry: false,
+  //   }
+  // );
   const [isRegister, setIsRegister] = useState<boolean>(false);
 
   return (
@@ -51,15 +52,16 @@ const Home: NextPage = () => {
                   });
                   console.warn("mutate data", data);
                 } else {
-                  setEmail(values.email);
-                  setPw(values.password);
-                  await query
-                    .refetch()
-                    .then((res) => console.warn("verify data", res.data));
+                  // setEmail(values.email);
+                  // setPw(values.password);
+                  await signIn("credentials");
+                  // await query
+                  //   .refetch()
+                  //   .then((res) => console.warn("verify data", res.data));
                 }
                 actions.setSubmitting(false);
-                setEmail("");
-                setPw("");
+                // setEmail("");
+                // setPw("");
                 actions.resetForm();
               }}
               validationSchema={Yup.object({
@@ -142,8 +144,10 @@ const Home: NextPage = () => {
                           size={7}
                           speedMultiplier={0.75}
                         />
+                      ) : isRegister ? (
+                        "Register"
                       ) : (
-                        "Submit"
+                        "Login"
                       )}
                     </button>
                   </div>

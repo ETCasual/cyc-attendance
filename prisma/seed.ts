@@ -3,33 +3,33 @@ import { prisma } from "../src/server/db";
 async function main() {
   const user = await prisma.user.upsert({
     where: {
-      email: "locolucha@gmail.com",
+      email: "casualorient@gmail.com",
     },
     update: {},
     create: {
       age: 30,
-      email: "locolucha@gmail.com",
-      cgRole: "Member",
-      fullName: "locobabi",
-      icNo: "913524-14-9637",
-      status: "OM",
-      phoneNumber: "0391352624",
-      nickName: "locomcb",
+      email: "casualorient@gmail.com",
+      cgRole: "CGL",
+      fullName: "Chin Jia Hao",
+      icNo: "000106-14-1101",
+      status: "CGL",
+      phoneNumber: "0172412866",
+      nickName: "ET",
       cluster: "Heart",
       gender: "Male",
       address: {
         create: {
-          street: "jalan lemak manis",
-          city: "koala lempur",
-          state: "sellangor",
-          country: "Muaklasia",
-          postCode: "56999",
+          street: "J7, Jalan Cahaya 12",
+          city: "Ampang",
+          state: "Selangor",
+          country: "Malaysia",
+          postCode: "68000",
         },
       },
 
       cellGroup: {
         create: {
-          id: "110J",
+          id: "27T",
         },
       },
     },

@@ -57,7 +57,16 @@ export const userRouter = createTRPCRouter({
           } else {
             const hash = bcrypt.hashSync(input.password, 11);
 
-            return await ctx.prisma.user.update({
+         await ctx.prisma.account.create({
+              data: {
+                provider: "credentials",
+                providerAccountId: String(data.uid),
+                type: "credentials",
+                userId:  data.uid ,
+              }
+            })
+
+             return await ctx.prisma.user.update({
               where: {
                 email: input.email,
               },
@@ -70,6 +79,8 @@ export const userRouter = createTRPCRouter({
                 fullName: true,
               },
             });
+
+            
           }
         });
     }),
@@ -84,6 +95,7 @@ export const userRouter = createTRPCRouter({
             password: true,
             fullName: true,
             email: true,
+            uid: true
           },
         })
         .then((data) => {
@@ -101,6 +113,7 @@ export const userRouter = createTRPCRouter({
           throw new Error(err as string);
         });
     }),
+ 
 
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";

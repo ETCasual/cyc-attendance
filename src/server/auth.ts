@@ -9,6 +9,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 import { env } from "@/env.mjs";
 import { prisma } from "@/server/db";
+import { caller } from "./api/root";
+import { z } from "zod";
+import { generateSessionToken } from "@/utils/helpers";
+import { randomUUID } from "crypto";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -37,17 +41,28 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  pages: {
-    signIn: "/",
-  },
+  // pages: {
+  //   signIn: "/",
+  // },
+  // session: {
+  //   strategy: "database",
+  //   generateSessionToken: randomUUID(),
+  // },
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    signIn({ user, account, profile, email, credentials }) {
+      return true;
+    },
+    session: ({ session, user }) => {
+      console.log("user ", user);
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+        },
+      };
+    },
   },
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -56,26 +71,21 @@ export const authOptions: NextAuthOptions = {
         email: { label: "email", type: "text", placeholder: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
-        // You need to provide your own logic here that takes the credentials
-        // submitted and returns either a object representing a user or value
-        // that is false/null if the credentials are invalid.
-        // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
-        // You can also use the `req` object to obtain additional parameters
-        // (i.e., the request IP address)
-        const res = await fetch("/your/endpoint", {
-          method: "POST",
-          body: JSON.stringify(credentials),
-          headers: { "Content-Type": "application/json" },
-        });
-        const user = await res.json();
 
-        // If no error and we have user data, return it
-        if (res.ok && user) {
-          return user;
-        }
-        // Return null if user data could not be retrieved
-        return null;
+      async authorize(credentials) {
+        if (!credentials || !credentials.email || !credentials.password)
+          return null;
+        const user = await caller.user.verifyLogin({
+          email: credentials.email,
+          password: credentials.password,
+        });
+        if (!user.data) return null;
+        console.log(user.data);
+        return {
+          id: String(user.data.uid),
+          email: user.data.email,
+          fullName: user.data.fullName,
+        };
       },
     }),
 
